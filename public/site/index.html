@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Project Newton</title>
+    <style media="screen">
+      body {
+        font-family: Roboto, Arial, sans-serif;
+        background: #ECEFF1;
+        color: rgba(0,0,0,0.87);
+      }
+
+      a {
+        color: rgb(3,155,229);
+      }
+
+      #main {
+        max-width: 400px;
+        margin: 40px auto;
+        box-shadow: 0 1px 3px 0 rgba(0,0,0,0.2),0 1px 1px 0 rgba(0,0,0,0.14),0 2px 1px -1px rgba(0,0,0,0.12);
+        border-radius: 2px;
+        background: white;
+        padding: 16px 24px;
+        text-align: center;
+      }
+
+      #main h1 {
+        font-size: 22px;
+        font-weight: 500;
+        text-align: center;
+        margin: 0 0 16px;
+      }
+
+      #sign-in-button {
+        background-color: #4CAF50; /* Green */
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+      }
+
+      #sign-out-button {
+        background-color: #FCAFF0;
+        border: solid;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+      }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/3.6.2/firebase.js"></script>
+    <script>
+      var config = {
+        apiKey: "AIzaSyDnvUBcx27cvxpAneHWlMmc2tEtXGO93oI",
+        authDomain: "newton-4b2cb.firebaseapp.com",
+        databaseURL: "https://newton-4b2cb.firebaseio.com",
+        storageBucket: "gs://newton-4b2cb.appspot.com"
+      };
+      firebase.initializeApp(config);
+    </script>
+    <script src="site/site.js"></script>
+  </head>
+  <body>
+    <div id="main"></div>
+  </body>
+</html>
