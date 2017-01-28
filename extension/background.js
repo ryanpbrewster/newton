@@ -89,8 +89,17 @@ function initApp() {
     title: "Newton Flag",
     contexts: ["selection"],
     onclick: function (info, tab) {
-      console.log("newton-flag context menu item clicked!", info, tab);
-      console.log("the selection is:", tab.getSelection());
+      console.log("newton-flag context menu item clicked!", info.selectionText);
+      chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+        console.log("queried for active tabs and received " + tabs.length + " of them");
+        chrome.tabs.sendMessage(tabs[0].id, { greeting: "foo bar baz" }, function (response) {
+          console.log("received response from tab: ", response);
+        });
+      });
+      // pushNewFlag({
+      //   text: info.selectionText,
+      //   url: info.pageUrl
+      // });
     }
   }, function () {
     console.log("done creating newton-flag");
