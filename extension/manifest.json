@@ -23,6 +23,8 @@
       "matches": ["http://*/*","https://*/*"],
       "js": [
         "lib/rangy-core.js",
+        "lib/rangy-classapplier.js",
+        "lib/rangy-highlighter.js",
         "lib/rangy-serializer.js",
         "on-page.js"
       ]
