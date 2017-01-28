@@ -1,0 +1,29 @@
+{
+  "manifest_version": 2,
+  "name": "Newton",
+  "description": "Fact-checking the internet, together",
+  "version": "0.1",
+  "icons": {
+    "16": "newton-16.png",
+    "128": "newton-128.png"
+  },
+  "browser_action": {
+    "default_icon": "newton-128.png"
+  },
+  "background": {
+    "page": "background.html"
+  },
+  "permissions": [
+    "contextMenus",
+    "identity"
+  ],
+  "content_security_policy":"script-src 'self' https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self'",
+  "oauth2": {
+    "client_id": "163096248652-e0joed62i9ub72fhil1eokv4oiv1t26n.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile"
+    ]
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAk+aCiw3/YL1Hcqyuu9LldQcHcSlQqc/8OFYXkRmsddEehwIr2miNihw5e/+GOIVWGq9G8kRrF2T1c0ySNtvwNIHq80cZ9FsSnUh3Y0NQKd5HCx0GljgBbLZ4gu4LVMv4hWstcGoLmOgbfI7NtA8Z3r0itv3ItXK+5Y+V6k2KspUX73EsFsNS+3CFQx6pI+2io+mMGhDdvsl965pm7hLqTcxYeDsQxQNCBYKX3QrRq9u8Kvku6Yu0+3ytJNsf85dR8ojlPguBVAsGtnadPjsck0Qsgn5UilqCIx8etcOB7AywHOh2bFl30tBhvTgeRBB4B5t6PX1Ie+2KfSAD3aE1xwIDAQAB"
+}
