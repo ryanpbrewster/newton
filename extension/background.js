@@ -9,6 +9,7 @@ firebase.initializeApp(config);
 var rootRef = firebase.database().ref();
 var flagsRef = rootRef.child("flags");
 var usersRef = rootRef.child("users");
+var urisRef = rootRef.child("uris");
 
 var user = null;
 
@@ -51,6 +52,7 @@ function pushNewFlag(flag) {
   var updateData = {};
   updateData["users/" + user.uid + "/flags/" + newFlagRef.key] = true;
   updateData["flags/" + newFlagRef.key] = flag;
+  updateData["uris/" + btoa(flag.url, 64) + "/" + newFlagRef.key] = true;
   console.log("pushing: ", updateData);
   return rootRef.update(updateData);
 }
@@ -106,6 +108,17 @@ function initApp() {
     if (chrome.runtime.lastError) {
       console.log("hit an error:", chrome.runtime.lastError);
     }
+  });
+
+  console.log("adding webNavigation listener");
+  chrome.webNavigation.onCompleted.addListener(function (info) {
+    console.log("navigated to " + info.url + ", loading flags");
+    urisRef.child(btoa(info.url, 64)).on("child_added", function (uriFlagSnap) {
+      console.log("found flag: " + uriFlagSnap.key);
+      flagsRef.child(uriFlagSnap.key).once("value", function (flagSnap) {
+        console.log("flag " + flagSnap.key + " @ " + flagSnap.val().selection);
+      });
+    });
   });
 }
 

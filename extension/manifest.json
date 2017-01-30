@@ -16,7 +16,8 @@
   "permissions": [
     "activeTab",
     "contextMenus",
-    "identity"
+    "identity",
+    "webNavigation"
   ],
   "content_scripts": [
     {
@@ -27,7 +28,8 @@
         "lib/rangy-highlighter.js",
         "lib/rangy-serializer.js",
         "on-page.js"
-      ]
+      ],
+      "css": [ "on-page.css" ]
     }
   ],
   "content_security_policy":"script-src 'self' https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self'",

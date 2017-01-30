@@ -2,9 +2,9 @@ console.log("loading content script!");
 rangy.init();
 var highlighter = rangy.createHighlighter();
 
-highlighter.addClassApplier(rangy.createClassApplier("note", {
+highlighter.addClassApplier(rangy.createClassApplier("newton-flag", {
     ignoreWhiteSpace: true,
-    elementTagName: "a",
+    elementTagName: "span",
     elementProperties: {
         onclick: function() {
             var highlight = highlighter.getHighlightForElement(this);
@@ -21,7 +21,7 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   switch (msg.action) {
     case "create":
       console.log("using current highlight");
-      highlighter.highlightSelection("note");
+      highlighter.highlightSelection("newton-flag");
       sendResponse({
         ok: true,
         selection: rangy.serializeSelection()
@@ -30,7 +30,7 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     case "apply":
       console.log("applying new highlight");
       rangy.deserializeSelection(msg.selection);
-      highlighter.highlightSelection("note");
+      highlighter.highlightSelection("newton-flag");
       sendResponse({
         ok: true
       });
