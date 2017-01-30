@@ -117,6 +117,11 @@ function initApp() {
       console.log("found flag: " + uriFlagSnap.key);
       flagsRef.child(uriFlagSnap.key).once("value", function (flagSnap) {
         console.log("flag " + flagSnap.key + " @ " + flagSnap.val().selection);
+        chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+          chrome.tabs.sendMessage(tabs[0].id, { action: "apply", flag: flagSnap.val() }, function (response) {
+            console.log("response from highlighting " + flagSnap.key + ":", response);
+          });
+        });
       });
     });
   });

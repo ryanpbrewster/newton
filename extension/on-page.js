@@ -21,15 +21,14 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   switch (msg.action) {
     case "create":
       console.log("using current highlight");
-      highlighter.highlightSelection("newton-flag");
       sendResponse({
         ok: true,
-        selection: rangy.serializeSelection()
+        selection: rangy.serializeSelection(rangy.getSelection(), true)
       });
       break;
     case "apply":
       console.log("applying new highlight");
-      rangy.deserializeSelection(msg.selection);
+      rangy.deserializeSelection(msg.flag.selection);
       highlighter.highlightSelection("newton-flag");
       sendResponse({
         ok: true
