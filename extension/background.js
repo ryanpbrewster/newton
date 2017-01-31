@@ -8,6 +8,7 @@ firebase.initializeApp(config);
 
 var rootRef = firebase.database().ref();
 var flagsRef = rootRef.child("flags");
+var notesRef = rootRef.child("notes");
 var usersRef = rootRef.child("users");
 var urisRef = rootRef.child("uris");
 
@@ -93,7 +94,7 @@ function initApp() {
     onclick: function (info, tab) {
       console.log("newton-flag context menu item clicked!", info.selectionText);
       chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, { action: "create" }, function (response) {
+        chrome.tabs.sendMessage(tabs[0].id, { action: "serializeSelection" }, function (response) {
           console.log("received response from tab: ", response);
           pushNewFlag({
             url: info.pageUrl,
@@ -118,12 +119,25 @@ function initApp() {
       flagsRef.child(uriFlagSnap.key).once("value", function (flagSnap) {
         console.log("flag " + flagSnap.key + " @ " + flagSnap.val().selection);
         chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-          chrome.tabs.sendMessage(tabs[0].id, { action: "apply", flag: flagSnap.val() }, function (response) {
-            console.log("response from highlighting " + flagSnap.key + ":", response);
+          chrome.tabs.sendMessage(tabs[0].id, { action: "registerFlag", flag: flagSnap.val() }, function (response) {
+            console.log("response from registerFlag " + flagSnap.key + ":", response);
+          });
+        });
+      });
+      notesRef.child(uriFlagSnap.key).on("child_added", function (noteSnap) {
+        console.log("note: ", noteSnap.val());
+        chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+          chrome.tabs.sendMessage(tabs[0].id, { action: "registerNote", note: noteSnap.val() }, function (response) {
+            console.log("response from registerNote " + noteSnap.key + ":", response);
           });
         });
       });
     });
+  });
+
+  console.log("setting up listeners");
+  chrome.runtime.onMessage.addListener(function (msg) {
+    console.log("received message:", msg);
   });
 }
 

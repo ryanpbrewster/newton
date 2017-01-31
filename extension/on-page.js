@@ -3,18 +3,35 @@ rangy.init();
 
 var highlighter = rangy.createHighlighter();
 
-var newtonThreadPane = document.createElement("div");
-newtonThreadPane.id = "newton-thread-pane";
-newtonThreadPane.addEventListener("click", function (clickEvent) {
-  console.log("newton-thread-pane clicked");
+var newtonNotePane = document.createElement("div");
+newtonNotePane.id = "newton-note-pane";
+newtonNotePane.addEventListener("click", function (clickEvent) {
+  console.log("newton-note-pane clicked");
   clickEvent.stopPropagation();
   return false;
 });
-document.getElementsByTagName("body")[0].appendChild(newtonThreadPane);
+document.getElementsByTagName("body")[0].appendChild(newtonNotePane);
+
+var newtonNoteInput = document.createElement("textarea");
+newtonNoteInput.id = "newton-note-input";
+newtonNoteInput.onkeypress = function (keyPressEvent) {
+  if (keyPressEvent.keyCode === 13 && !keyPressEvent.shiftKey) {
+    chrome.runtime.sendMessage({ "action": "createNote", "text": newtonNoteInput.value });
+    newtonNoteInput.value = "";
+    return false;
+  }
+};
+newtonNotePane.appendChild(newtonNoteInput);
+
+function clearNotePane() {
+  while (newtonNotePane.lastChild !== newtonNoteInput) {
+    newtonNotePane.removeChild(newtonNotePane.lastChild);
+  }
+}
 
 document.getElementsByTagName("html")[0].addEventListener("click", function (event) {
   console.log("html clicked");
-  newtonThreadPane.style["display"] = "none";
+  newtonNotePane.style["display"] = "none";
 });
 
 highlighter.addClassApplier(rangy.createClassApplier("newton-flag", {
@@ -23,8 +40,12 @@ highlighter.addClassApplier(rangy.createClassApplier("newton-flag", {
     elementProperties: {
         onclick: function(clickEvent) {
             var highlight = highlighter.getHighlightForElement(this);
-            console.log("Clicked on highlight " + highlight.id);
-            newtonThreadPane.style["display"] = "block";
+            console.log("Clicked on highlight " + highlight.id + " with flag " + highlight.flagId);
+
+            clearNotePane();
+            newtonNotePane.style["display"] = "block";
+            chrome.runtime.sendMessage({ "action": "setActiveFlag", "flagId": highlight.flagId });
+
             clickEvent.stopPropagation();
             return false;
         }
@@ -34,17 +55,24 @@ highlighter.addClassApplier(rangy.createClassApplier("newton-flag", {
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   console.log("sender = " + sender.id + ", my id = " + chrome.runtime.id);
   switch (msg.action) {
-    case "create":
+    case "serializeSelection":
       sendResponse({
         ok: true,
         selection: rangy.serializeSelection(rangy.getSelection(), true)
       });
       break;
-    case "apply":
-      console.log("applying new highlight");
+    case "registerFlag":
       rangy.deserializeSelection(msg.flag.selection);
-      var h = highlighter.highlightSelection("newton-flag");
-      console.log(h.id);
+      highlighter.highlightSelection("newton-flag");
+      sendResponse({
+        ok: true
+      });
+      break;
+    case "registerNote":
+      console.log("note:", msg.note);
+      var noteElement = document.createElement("p");
+      noteElement.innerText = msg.note.text;
+      newtonNotePane.insertBefore(noteElement, newtonNoteInput);
       sendResponse({
         ok: true
       });
