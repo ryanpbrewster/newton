@@ -5,6 +5,11 @@ var highlighter = rangy.createHighlighter();
 
 var newtonThreadPane = document.createElement("div");
 newtonThreadPane.id = "newton-thread-pane";
+newtonThreadPane.addEventListener("click", function (clickEvent) {
+  console.log("newton-thread-pane clicked");
+  clickEvent.stopPropagation();
+  return false;
+});
 document.getElementsByTagName("body")[0].appendChild(newtonThreadPane);
 
 document.getElementsByTagName("html")[0].addEventListener("click", function (event) {
