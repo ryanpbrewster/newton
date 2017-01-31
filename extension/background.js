@@ -13,6 +13,7 @@ var usersRef = rootRef.child("users");
 var urisRef = rootRef.child("uris");
 
 var user = null;
+var activeFlagKey = null;
 
 function startAuth() {
   console.log("startAuth called");
@@ -54,6 +55,24 @@ function pushNewFlag(flag) {
   updateData["users/" + user.uid + "/flags/" + newFlagRef.key] = true;
   updateData["flags/" + newFlagRef.key] = flag;
   updateData["uris/" + btoa(flag.url, 64) + "/" + newFlagRef.key] = true;
+  console.log("pushing: ", updateData);
+  return rootRef.update(updateData);
+}
+
+/**
+ * Create a new flag
+ */
+function pushNewNote(note) {
+  if (!user) {
+    console.error("pushNewNote called with no user!");
+    return;
+  }
+  note.createdAt = firebase.database.ServerValue.TIMESTAMP;
+
+  var newNoteRef = notesRef.child(note.flagKey).push();
+  var updateData = {};
+  updateData["users/" + user.uid + "/notes/" + newNoteRef.key] = true;
+  updateData["notes/" + note.flagKey + "/" + newNoteRef.key] = note;
   console.log("pushing: ", updateData);
   return rootRef.update(updateData);
 }
@@ -119,16 +138,8 @@ function initApp() {
       flagsRef.child(uriFlagSnap.key).once("value", function (flagSnap) {
         console.log("flag " + flagSnap.key + " @ " + flagSnap.val().selection);
         chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-          chrome.tabs.sendMessage(tabs[0].id, { action: "registerFlag", flag: flagSnap.val() }, function (response) {
+          chrome.tabs.sendMessage(tabs[0].id, { action: "registerFlag", key: flagSnap.key, flag: flagSnap.val() }, function (response) {
             console.log("response from registerFlag " + flagSnap.key + ":", response);
-          });
-        });
-      });
-      notesRef.child(uriFlagSnap.key).on("child_added", function (noteSnap) {
-        console.log("note: ", noteSnap.val());
-        chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-          chrome.tabs.sendMessage(tabs[0].id, { action: "registerNote", note: noteSnap.val() }, function (response) {
-            console.log("response from registerNote " + noteSnap.key + ":", response);
           });
         });
       });
@@ -138,6 +149,30 @@ function initApp() {
   console.log("setting up listeners");
   chrome.runtime.onMessage.addListener(function (msg) {
     console.log("received message:", msg);
+    switch (msg.action) {
+      case "setActiveFlag":
+        if (activeFlagKey) {
+          notesRef.child(activeFlagKey).off("child_added");
+        }
+        activeFlagKey = msg.key;
+        notesRef.child(activeFlagKey).on("child_added", function (noteSnap) {
+          console.log("note: ", noteSnap.val());
+          chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, { action: "registerNote", key: noteSnap.key, note: noteSnap.val() }, function (response) {
+              console.log("response from registerNote " + noteSnap.key + ":", response);
+            });
+          });
+        });
+        break;
+      case "createNote":
+        pushNewNote({
+          text: msg.text,
+          flagKey: activeFlagKey
+        });
+        break;
+      default:
+        console.error("could not recognize action: " + msg.action);
+    }
   });
 }
 

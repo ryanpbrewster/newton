@@ -3,6 +3,8 @@ rangy.init();
 
 var highlighter = rangy.createHighlighter();
 
+var flagKeyByHighlightId = {};
+
 var newtonNotePane = document.createElement("div");
 newtonNotePane.id = "newton-note-pane";
 newtonNotePane.addEventListener("click", function (clickEvent) {
@@ -24,8 +26,8 @@ newtonNoteInput.onkeypress = function (keyPressEvent) {
 newtonNotePane.appendChild(newtonNoteInput);
 
 function clearNotePane() {
-  while (newtonNotePane.lastChild !== newtonNoteInput) {
-    newtonNotePane.removeChild(newtonNotePane.lastChild);
+  while (newtonNotePane.firstChild !== newtonNoteInput) {
+    newtonNotePane.removeChild(newtonNotePane.firstChild);
   }
 }
 
@@ -39,12 +41,12 @@ highlighter.addClassApplier(rangy.createClassApplier("newton-flag", {
     elementTagName: "span",
     elementProperties: {
         onclick: function(clickEvent) {
-            var highlight = highlighter.getHighlightForElement(this);
-            console.log("Clicked on highlight " + highlight.id + " with flag " + highlight.flagId);
+            var h = highlighter.getHighlightForElement(this);
+            console.log("Clicked on highlight " + h.id + " with flag " + flagKeyByHighlightId[h.id]);
 
             clearNotePane();
             newtonNotePane.style["display"] = "block";
-            chrome.runtime.sendMessage({ "action": "setActiveFlag", "flagId": highlight.flagId });
+            chrome.runtime.sendMessage({ "action": "setActiveFlag", "key": flagKeyByHighlightId[h.id] });
 
             clickEvent.stopPropagation();
             return false;
@@ -62,11 +64,20 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
       });
       break;
     case "registerFlag":
-      rangy.deserializeSelection(msg.flag.selection);
-      highlighter.highlightSelection("newton-flag");
-      sendResponse({
-        ok: true
-      });
+      try {
+        rangy.deserializeSelection(msg.flag.selection);
+        var h = highlighter.highlightSelection("newton-flag")[0];
+        flagKeyByHighlightId[h.id] = msg.key;
+        sendResponse({
+          ok: true
+        });
+      } catch(err) {
+        console.error("could not deserialize flag " + msg.key);
+        sendResponse({
+          ok: false,
+          err: err
+        });
+      }
       break;
     case "registerNote":
       console.log("note:", msg.note);
