@@ -18,7 +18,7 @@ var activeFlagKey = null;
 function startAuth() {
   console.log("startAuth called");
   // Request an OAuth token from the Chrome Identity API.
-  chrome.identity.getAuthToken({interactive: false}, function(token) {
+  chrome.identity.getAuthToken({interactive: true}, function(token) {
     console.log("got a token: ", token);
     if(chrome.runtime.lastError) {
       console.error(chrome.runtime.lastError);
