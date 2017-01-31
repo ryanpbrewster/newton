@@ -1,16 +1,26 @@
 console.log("loading content script!");
 rangy.init();
+
 var highlighter = rangy.createHighlighter();
+
+var newtonThreadPane = document.createElement("div");
+newtonThreadPane.id = "newton-thread-pane";
+document.getElementsByTagName("body")[0].appendChild(newtonThreadPane);
+
+document.getElementsByTagName("html")[0].addEventListener("click", function (event) {
+  console.log("html clicked");
+  newtonThreadPane.style["display"] = "none";
+});
 
 highlighter.addClassApplier(rangy.createClassApplier("newton-flag", {
     ignoreWhiteSpace: true,
     elementTagName: "span",
     elementProperties: {
-        onclick: function() {
+        onclick: function(clickEvent) {
             var highlight = highlighter.getHighlightForElement(this);
-            if (window.confirm("Delete this note (ID " + highlight.id + ")?")) {
-                highlighter.removeHighlights( [highlight] );
-            }
+            console.log("Clicked on highlight " + highlight.id);
+            newtonThreadPane.style["display"] = "block";
+            clickEvent.stopPropagation();
             return false;
         }
     }
@@ -20,7 +30,6 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   console.log("sender = " + sender.id + ", my id = " + chrome.runtime.id);
   switch (msg.action) {
     case "create":
-      console.log("using current highlight");
       sendResponse({
         ok: true,
         selection: rangy.serializeSelection(rangy.getSelection(), true)
@@ -29,11 +38,14 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     case "apply":
       console.log("applying new highlight");
       rangy.deserializeSelection(msg.flag.selection);
-      highlighter.highlightSelection("newton-flag");
+      var h = highlighter.highlightSelection("newton-flag");
+      console.log(h.id);
       sendResponse({
         ok: true
       });
+      break;
     default:
+      console.error("unrecognized action", msg);
       sendResponse({
         ok: false,
         error: "could not recognize action"
