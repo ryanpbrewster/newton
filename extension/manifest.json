@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Newton",
   "description": "Fact-checking the internet, together",
-  "version": "0.1",
+  "version": "0.2",
   "icons": {
     "16": "newton-16.png",
     "128": "newton-128.png"
