@@ -46,6 +46,7 @@ highlighter.addClassApplier(rangy.createClassApplier("newton-flag", {
 
             clearNotePane();
             newtonNotePane.style["display"] = "block";
+            newtonNoteInput.focus();
             chrome.runtime.sendMessage({ "action": "setActiveFlag", "key": flagKeyByHighlightId[h.id] });
 
             clickEvent.stopPropagation();
